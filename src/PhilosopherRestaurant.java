@@ -66,8 +66,8 @@ public class PhilosopherRestaurant {
 
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub
 			System.out.println(this);
+			// TODO Synchronize the philosophers eating and handing their chopsticks over when someone hasn't eaten
 		}
 		
 		public int getId() {
