@@ -28,13 +28,19 @@ public class PhilosopherRestaurant {
 	
 	private class Philosopher implements Runnable{
 
+		private int number;
+		private int timesEaten;
+
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub
 			
 		}
 		
-		
+		@Override
+		public String toString() {
+			return "Philosopher number:" + this.number + ". Times Eaten: " + this.timesEaten;
+		}
 		
 	}
 
