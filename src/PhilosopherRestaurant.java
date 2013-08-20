@@ -1,5 +1,3 @@
-import PingPongManager.PingPongPlayer;
-
 
 public class PhilosopherRestaurant {
 
