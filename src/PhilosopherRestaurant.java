@@ -22,19 +22,28 @@ public class PhilosopherRestaurant {
 	private Thread[] philosopherThreads;
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		PhilosopherRestaurant thinkNEat = new PhilosopherRestaurant();
 		thinkNEat.startDinner();
 		thinkNEat.waitForPhilosophers();
 	}
 	
 	private void waitForPhilosophers() {
-		// TODO Auto-generated method stub
+		for( Thread t : philosopherThreads )
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		
+		System.out.println("Dinner is Over!");
 		
 	}
 
 	private void startDinner() {
 		System.out.println("Dinner is starting!\n");
+		for( Thread t : philosopherThreads ) 
+			t.start();
+			
 	}
 
 	private PhilosopherRestaurant() {
@@ -58,7 +67,7 @@ public class PhilosopherRestaurant {
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub
-			
+			System.out.println(this);
 		}
 		
 		public int getId() {
@@ -71,7 +80,7 @@ public class PhilosopherRestaurant {
 		}
 
 		private boolean isFull() {
-			return bitesLeft > 0;
+			return bitesLeft <= 0;
 			
 		}
 		
