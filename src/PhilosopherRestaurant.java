@@ -22,9 +22,14 @@ public class PhilosopherRestaurant {
 	private Thread[] philosopherThreads;
 	
 	public static void main(String[] args) {
-		PhilosopherRestaurant thinkNEat = new PhilosopherRestaurant();
+		PhilosopherRestaurant thinkNEat = newPhilosopherRestaurant();
 		thinkNEat.startDinner();
 		thinkNEat.waitForPhilosophers();
+	}
+	
+	// Static Factory Method
+	public static PhilosopherRestaurant newPhilosopherRestaurant() {
+		return new PhilosopherRestaurant();
 	}
 	
 	private void waitForPhilosophers() {
