@@ -130,12 +130,12 @@ public class PhilosopherRestaurant {
 		private int id;
 		private int bitesLeft;
 		
-		Map<Side, Chopstick> chopsticks;
+		private Map<Side, Chopstick> chopsticks;
 		
 		public Philosopher(int idNumber, int maxBites, Chopstick leftChopstick, Chopstick rightChopstick){
 			this.id = idNumber;
 			this.bitesLeft = maxBites;
-			chopsticks = Collections.synchronizedMap( new EnumMap<Side, Chopstick>(Side.class));
+			chopsticks = new EnumMap<Side, Chopstick>(Side.class);
 			chopsticks.put(Side.LEFT, leftChopstick);
 			chopsticks.put(Side.RIGHT, rightChopstick);
 		}
@@ -165,8 +165,6 @@ public class PhilosopherRestaurant {
 					} else {
 						chopsticks.get(firstSide).putDown();
 						announce(Action.PUTDOWN,firstSide);
-
-
 					}
 				}
 			}
