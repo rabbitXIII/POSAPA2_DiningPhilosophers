@@ -13,7 +13,7 @@ public class PhilosopherRestaurant {
 	 * 
 	 */
 	private enum Settings {
-		NUMBER_OF_PHILOSOPHERS(5),		MAX_BITES_FOR_PHILOSOPHERS(5);
+		NUMBER_OF_PHILOSOPHERS(20),		MAX_BITES_FOR_PHILOSOPHERS(10);
 		private final int value;
 		private Settings(int value) {
             this.value = value;
@@ -68,13 +68,15 @@ public class PhilosopherRestaurant {
 	
 	private class Chopstick {
 		
-		public Lock used = new ReentrantLock();
+		private Lock used;
 		
 		private final int id;
 		
 		public Chopstick(int id) {
 			this.id = id;
+			 used = new ReentrantLock();
 		}
+		
 		
 		public boolean pickUp() {
 			try {
@@ -88,6 +90,11 @@ public class PhilosopherRestaurant {
 		public void putDown() {
 			used.unlock();
 		}
+
+		@SuppressWarnings("unused")
+		public int getId() {
+			return id;
+		}
 		
 	}
 	
@@ -96,8 +103,6 @@ public class PhilosopherRestaurant {
 
 		private int id;
 		private int bitesLeft;
-		private Chopstick rightChopstick;
-		private Chopstick leftChopstick;
 		
 		private Chopstick[] chopsticks;
 		
@@ -105,8 +110,6 @@ public class PhilosopherRestaurant {
 		public Philosopher(int idNumber, int maxBites, Chopstick leftChopstick, Chopstick rightChopstick){
 			this.id = idNumber;
 			this.bitesLeft = maxBites;
-			this.leftChopstick = leftChopstick;
-			this.rightChopstick = rightChopstick;
 			chopsticks = new Chopstick[2];
 			chopsticks[0] = leftChopstick;
 			chopsticks[1] = rightChopstick;
