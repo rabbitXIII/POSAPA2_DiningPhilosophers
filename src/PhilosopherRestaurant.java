@@ -1,3 +1,7 @@
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 
 public class PhilosopherRestaurant {
 
@@ -53,9 +57,38 @@ public class PhilosopherRestaurant {
 
 	private PhilosopherRestaurant() {
 		philosopherThreads = new Thread[Settings.NUMBER_OF_PHILOSOPHERS.getValue()];
+		Chopstick[] forks = new Chopstick[Settings.NUMBER_OF_PHILOSOPHERS.getValue()];
+		for(int i = 0 ; i < forks.length ; i ++ )
+			forks[i] = new Chopstick(i);
 		for(int i = 0 ; i < philosopherThreads.length; i++ )
 			philosopherThreads[i] = new Thread(
-					new Philosopher(i, Settings.MAX_BITES_FOR_PHILOSOPHERS.getValue()));
+					new Philosopher(i, Settings.MAX_BITES_FOR_PHILOSOPHERS.getValue(), 
+							forks[i], forks[(i+1)%Settings.NUMBER_OF_PHILOSOPHERS.getValue()]));
+	}
+	
+	private class Chopstick {
+		
+		public Lock used = new ReentrantLock();
+		
+		private final int id;
+		
+		public Chopstick(int id) {
+			this.id = id;
+		}
+		
+		public boolean pickUp() {
+			try {
+				return used.tryLock(500, TimeUnit.MICROSECONDS);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			return false;
+		}
+		
+		public void putDown() {
+			used.unlock();
+		}
+		
 	}
 	
 	
@@ -63,16 +96,42 @@ public class PhilosopherRestaurant {
 
 		private int id;
 		private int bitesLeft;
+		private Chopstick rightChopstick;
+		private Chopstick leftChopstick;
 		
-		public Philosopher(int idNumber, int maxBites){
+		
+		public Philosopher(int idNumber, int maxBites, Chopstick leftChopstick, Chopstick rightChopstick){
 			this.id = idNumber;
 			this.bitesLeft = maxBites;
+			this.leftChopstick = leftChopstick;
+			this.rightChopstick = rightChopstick;
+		}
+		
+		private void announcePickup(String side){ 
+			System.out.println("Philosopher " + getId() + " picks up " + side + " chopstick.");
 		}
 
 		@Override
 		public void run() {
-			System.out.println(this);
-			// TODO Synchronize the philosophers eating and handing their chopsticks over when someone hasn't eaten
+			while( ! isFull() ) {
+				if( rightChopstick.pickUp() ) {
+					announcePickup("right");
+					if ( leftChopstick.pickUp() ) {
+						announcePickup("left");
+						eat();
+						leftChopstick.putDown();
+						rightChopstick.putDown();
+					} else {
+						rightChopstick.putDown();
+
+					}
+				}
+			}
+		}
+		
+		private void eat() {
+			System.out.println("Philosopher " + getId() + " eats.");
+			bitesLeft--;
 		}
 		
 		public int getId() {
