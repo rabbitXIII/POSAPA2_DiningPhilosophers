@@ -1,3 +1,6 @@
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -13,7 +16,7 @@ public class PhilosopherRestaurant {
 	 * 
 	 */
 	private enum Settings {
-		NUMBER_OF_PHILOSOPHERS(20),		MAX_BITES_FOR_PHILOSOPHERS(10);
+		NUMBER_OF_PHILOSOPHERS(5),		MAX_BITES_FOR_PHILOSOPHERS(5);
 		private final int value;
 		private Settings(int value) {
             this.value = value;
@@ -21,6 +24,29 @@ public class PhilosopherRestaurant {
 		public int getValue() {
             return value;
         }
+	}
+	
+	private static enum Action {
+		PICKUP, PUTDOWN;
+	}
+	
+	private static enum Side {
+		LEFT, RIGHT;
+
+		public static Side getRandomSide() {
+			int side = (int) Math.round(Math.random());
+			if( side == 0 ) 
+				return LEFT;
+			else
+				return RIGHT;
+		}
+
+		public static Side getOppositeSide(Side firstSide) {
+			if( firstSide == LEFT ) 
+				return RIGHT;
+			else
+				return LEFT;
+		}
 	}
 	
 	private Thread[] philosopherThreads;
@@ -104,35 +130,42 @@ public class PhilosopherRestaurant {
 		private int id;
 		private int bitesLeft;
 		
-		private Chopstick[] chopsticks;
-		
+		Map<Side, Chopstick> chopsticks;
 		
 		public Philosopher(int idNumber, int maxBites, Chopstick leftChopstick, Chopstick rightChopstick){
 			this.id = idNumber;
 			this.bitesLeft = maxBites;
-			chopsticks = new Chopstick[2];
-			chopsticks[0] = leftChopstick;
-			chopsticks[1] = rightChopstick;
+			chopsticks = Collections.synchronizedMap( new EnumMap<Side, Chopstick>(Side.class));
+			chopsticks.put(Side.LEFT, leftChopstick);
+			chopsticks.put(Side.RIGHT, rightChopstick);
 		}
 		
-		private void announcePickup(int side){ 
-			String sideName = (side == 0 ? "left" : "right");
-			System.out.println("Philosopher " + getId() + " picks up " + sideName + " chopstick.");
+		private void announce( Enum<Action> action, Enum<Side> side){ 
+			System.out.println("Philosopher " + getId() + " " + 
+					( action.equals(Action.PICKUP) ? "picks up" : "puts down" ) + " " + 
+					( side.equals(Side.LEFT) ? "left" : "right" ) + " chopstick.");
 		}
 
 		@Override
 		public void run() {
 			while( ! isFull() ) {
-				int side = (int) Math.round(Math.random());
-				if( chopsticks[side].pickUp() ) {
-					announcePickup(side);
-					if ( chopsticks[(side+1)%2].pickUp() ) {
-						announcePickup((side+1)%2);
+				
+				Side firstSide = Side.getRandomSide();
+				Side secondSide = Side.getOppositeSide(firstSide);
+				
+				if( chopsticks.get(firstSide).pickUp() ) {
+					announce(Action.PICKUP,firstSide);
+					if ( chopsticks.get(secondSide).pickUp() ) {
+						announce(Action.PICKUP,secondSide);
 						eat();
-						chopsticks[(side+1)%2].putDown();
-						chopsticks[side].putDown();
+						chopsticks.get(secondSide).putDown();
+						announce(Action.PUTDOWN,secondSide);
+						chopsticks.get(firstSide).putDown();
+						announce(Action.PUTDOWN,firstSide);
 					} else {
-						chopsticks[side].putDown();
+						chopsticks.get(firstSide).putDown();
+						announce(Action.PUTDOWN,firstSide);
+
 
 					}
 				}
