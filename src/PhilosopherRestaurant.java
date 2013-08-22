@@ -90,7 +90,7 @@ public class PhilosopherRestaurant {
 					new Philosopher(i, Settings.MAX_BITES_FOR_PHILOSOPHERS.getValue(), 
 							forks[i], forks[(i+1)%Settings.NUMBER_OF_PHILOSOPHERS.getValue()]));
 	}
-	
+	/* Immutable Chopstick class */
 	private class Chopstick {
 		
 		private Lock used;
@@ -99,7 +99,7 @@ public class PhilosopherRestaurant {
 		
 		public Chopstick(int id) {
 			this.id = id;
-			 used = new ReentrantLock();
+			used = new ReentrantLock();
 		}
 		
 		
@@ -134,6 +134,9 @@ public class PhilosopherRestaurant {
 		public Philosopher(int idNumber, int maxBites, Chopstick leftChopstick, Chopstick rightChopstick){
 			this.id = idNumber;
 			this.bitesLeft = maxBites;
+			
+			// could check for maxbites < 0 for illegal argument
+			
 			chopsticks = new EnumMap<Side, Chopstick>(Side.class);
 			chopsticks.put(Side.LEFT, leftChopstick);
 			chopsticks.put(Side.RIGHT, rightChopstick);
