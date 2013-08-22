@@ -99,30 +99,37 @@ public class PhilosopherRestaurant {
 		private Chopstick rightChopstick;
 		private Chopstick leftChopstick;
 		
+		private Chopstick[] chopsticks;
+		
 		
 		public Philosopher(int idNumber, int maxBites, Chopstick leftChopstick, Chopstick rightChopstick){
 			this.id = idNumber;
 			this.bitesLeft = maxBites;
 			this.leftChopstick = leftChopstick;
 			this.rightChopstick = rightChopstick;
+			chopsticks = new Chopstick[2];
+			chopsticks[0] = leftChopstick;
+			chopsticks[1] = rightChopstick;
 		}
 		
-		private void announcePickup(String side){ 
-			System.out.println("Philosopher " + getId() + " picks up " + side + " chopstick.");
+		private void announcePickup(int side){ 
+			String sideName = (side == 0 ? "left" : "right");
+			System.out.println("Philosopher " + getId() + " picks up " + sideName + " chopstick.");
 		}
 
 		@Override
 		public void run() {
 			while( ! isFull() ) {
-				if( rightChopstick.pickUp() ) {
-					announcePickup("right");
-					if ( leftChopstick.pickUp() ) {
-						announcePickup("left");
+				int side = (int) Math.round(Math.random());
+				if( chopsticks[side].pickUp() ) {
+					announcePickup(side);
+					if ( chopsticks[(side+1)%2].pickUp() ) {
+						announcePickup((side+1)%2);
 						eat();
-						leftChopstick.putDown();
-						rightChopstick.putDown();
+						chopsticks[(side+1)%2].putDown();
+						chopsticks[side].putDown();
 					} else {
-						rightChopstick.putDown();
+						chopsticks[side].putDown();
 
 					}
 				}
