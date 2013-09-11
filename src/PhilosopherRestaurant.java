@@ -1,5 +1,8 @@
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -48,7 +51,8 @@ public class PhilosopherRestaurant {
 		}
 	}
 	
-	private Thread[] philosopherThreads;
+	private Philosopher[] philosophers;
+	private ExecutorService dinnerExecutor;
 	
 	public static void main(String[] args) {
 		PhilosopherRestaurant thinkNEat = newPhilosopherRestaurant();
@@ -62,33 +66,30 @@ public class PhilosopherRestaurant {
 	}
 	
 	private void waitForPhilosophers() {
-		for( Thread t : philosopherThreads )
-			try {
-				t.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		
+		dinnerExecutor.shutdown();
+		// I don't like this solution. Waiting for the dinner executor in a spin wait seems odd.
+		// Could consider using a CountdownLatch that the philosophers decrement when they're full, and 
+		// .await() on that latch.
+		while(!dinnerExecutor.isTerminated()) {}
 		System.out.println("Dinner is Over!");
 		
 	}
 
 	private void startDinner() {
 		System.out.println("Dinner is starting!\n");
-		for( Thread t : philosopherThreads ) 
-			t.start();
-			
+		for( Philosopher p : philosophers ) 
+			dinnerExecutor.execute(p);
 	}
 
 	private PhilosopherRestaurant() {
-		philosopherThreads = new Thread[Settings.NUMBER_OF_PHILOSOPHERS.getValue()];
+		philosophers = new Philosopher[Settings.NUMBER_OF_PHILOSOPHERS.getValue()];
 		Chopstick[] chopsticks = new Chopstick[Settings.NUMBER_OF_PHILOSOPHERS.getValue()];
 		for(int i = 0 ; i < chopsticks.length ; i ++ )
 			chopsticks[i] = new Chopstick(i);
-		for(int i = 0 ; i < philosopherThreads.length; i++ )
-			philosopherThreads[i] = new Thread(
-					new Philosopher(i, Settings.MAX_BITES_FOR_PHILOSOPHERS.getValue(), 
-							chopsticks[i], chopsticks[(i+1)%Settings.NUMBER_OF_PHILOSOPHERS.getValue()]));
+		dinnerExecutor = Executors.newCachedThreadPool();
+		for(int i = 0 ; i < philosophers.length; i++ )
+			philosophers[i] = new Philosopher(i, Settings.MAX_BITES_FOR_PHILOSOPHERS.getValue(), 
+					chopsticks[i], chopsticks[(i+1)%Settings.NUMBER_OF_PHILOSOPHERS.getValue()]);
 	}
 	/* Immutable Chopstick class */
 	private class Chopstick {
