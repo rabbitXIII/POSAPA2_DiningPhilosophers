@@ -82,13 +82,13 @@ public class PhilosopherRestaurant {
 
 	private PhilosopherRestaurant() {
 		philosopherThreads = new Thread[Settings.NUMBER_OF_PHILOSOPHERS.getValue()];
-		Chopstick[] forks = new Chopstick[Settings.NUMBER_OF_PHILOSOPHERS.getValue()];
-		for(int i = 0 ; i < forks.length ; i ++ )
-			forks[i] = new Chopstick(i);
+		Chopstick[] chopsticks = new Chopstick[Settings.NUMBER_OF_PHILOSOPHERS.getValue()];
+		for(int i = 0 ; i < chopsticks.length ; i ++ )
+			chopsticks[i] = new Chopstick(i);
 		for(int i = 0 ; i < philosopherThreads.length; i++ )
 			philosopherThreads[i] = new Thread(
 					new Philosopher(i, Settings.MAX_BITES_FOR_PHILOSOPHERS.getValue(), 
-							forks[i], forks[(i+1)%Settings.NUMBER_OF_PHILOSOPHERS.getValue()]));
+							chopsticks[i], chopsticks[(i+1)%Settings.NUMBER_OF_PHILOSOPHERS.getValue()]));
 	}
 	/* Immutable Chopstick class */
 	private class Chopstick {
